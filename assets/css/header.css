@@ -1,0 +1,21 @@
+.nav-bar {
+  display: inline-block;
+  background-color: navajowhite;
+  width: 100%;
+  margin: 0%;
+  padding: 0%;
+}
+
+.nav-bar p {
+  font-size: 30px;
+  margin: 5px;
+  padding: 5px;
+  text-align: left;
+}
+
+.nav-bar .right-section {
+  text-align: right;
+  margin: 5px;
+  padding: 5px;
+  display: flex;
+}
