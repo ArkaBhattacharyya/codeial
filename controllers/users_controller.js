@@ -2,11 +2,28 @@ const User = require('../models/user');
 
 
 module.exports.profile = function(req, res){
-    return res.render('user_profile', {
-        title: 'User Profile'
+    User.findById(req.params.id).then((user)=>{
+        return res.render('user_profile', {
+            title: 'User Profile',
+            profile_user: user
+        })
+    }).catch((err)=>{
+        console.log(err);
     })
+    
 }
 
+module.exports.update = function(req,res){
+    if(req.user.id == req.params.id){
+        User.findByIdAndUpdate(req.params.id, req.body).then(()=>{
+            return res.redirect('back');
+        }).catch((err)=>{
+            console.log(err);
+        })
+    }else{
+      return res.status(401).send('Unauthorised');
+    }
+}
 
 // render the sign up page
 module.exports.signUp = function(req, res){
@@ -56,6 +73,9 @@ module.exports.createSession = function(req, res){
 }
 
 module.exports.destroySession = function(req, res){
-    req.logout();
-    return res.redirect('/');
+    req.logout(function(err) {
+        if (err) { return next(err); }
+        return res.redirect('/');
+      });
+    // return res.redirect('/');
 }
