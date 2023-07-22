@@ -20,8 +20,8 @@ module.exports.index = async function(req,res){
 
 module.exports.destroy = function (req, res) {
   Post.findById(req.params.id).then((post) => {
-        // if (post.user == req.user.id) {
-           //console.log("matched");
+         if (post.user == req.user.id) {
+           
            post.deleteOne().then(()=>{}).catch((err)=>{console.log(err);})
            Comment.deleteMany({ post: req.params.id })
               .then(() => {
@@ -40,9 +40,11 @@ module.exports.destroy = function (req, res) {
               .catch((err) => {
                  console.log(err);
               })
-        // }else{
-        //    return res.redirect('back');
-        // }
+        }else{
+           return res.json(401,{
+            message: "You Can not delete this post!"
+           });
+        }
      })
      .catch((err) => {
       return res.json(500,{
