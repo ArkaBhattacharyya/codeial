@@ -1,8 +1,13 @@
 const express = require('express');
+const dotenv =require('dotenv')
+dotenv.config();
+const env = require('./config/environment');
+const logger = require('morgan');
+
 const cookieParser = require('cookie-parser');   
 const app = express();
-const port = 6500;
-
+require('./config/view-helper')(app);
+const port = process.env.PORT || 6500;
 //require express ejs layout
 const expressLayouts = require('express-ejs-layouts');
 const db = require('./config/mongoose');
@@ -15,22 +20,37 @@ const MongoStore = require('connect-mongo');
 const sassMiddleware = require('node-sass-middleware');
 const flash = require('connect-flash');
 const customMiddleware = require('./config/middleware');
+const chatServer = require('http').Server(app);
+const chatSockets = require('./config/chat_sockets').chatSockets(chatServer);
+chatServer.listen(5000,function(error){
+    if(error){
+     console.log("socket error here");
+     return;
+    }
+    console.log("chat server listing on port 5000");
+ });
 
-app.use(sassMiddleware({
-    src : './assets/scss',
-    dest: './assets/css',
-    debug: true,
-    outputStyle: 'expanded',
-    prefix: '/css'
-}))
+ const path = require('path');
+if(env.name == 'development'){
+    app.use(sassMiddleware({
+        src : path.join(__dirname,env.asset_path,'scss'),
+        dest: path.join(__dirname,env.asset_path,'css'),
+        debug: true,
+        outputStyle: 'expanded',
+        prefix: '/css'
+    }))
+}
 
 app.use(express.urlencoded());
  app.use(cookieParser());
 
-app.use(express.static('./assets'));
+app.use(express.static(env.asset_path));
 app.use('/uploads', express.static(__dirname+ '/uploads'));
 
 app.use(expressLayouts);
+
+app.use(logger(env.morgan.mode, env.morgan.options));
+
 //extract style and scripts from sub pages into the layouts
 app.set('layout extractStyles',true);
 app.set('layout extractScripts',true);
@@ -41,7 +61,7 @@ app.set('views', './views');
 // mongo store is used to store the session cookie in the db
 app.use(session({
         name: 'codeial',
-        secret: 'somethings',
+        secret: env.session_cookie_key,
         saveUninitialized: false,
         resave: false,
         cookie: {
@@ -60,10 +80,8 @@ app.use(customMiddleware.setFlash);
 
 
 app.use(passport.setAuthenticatedUser);
-
 //user express router
 app.use('/',require('./routes'));
-
 app.listen(port, function(err){
   
     if(err){
