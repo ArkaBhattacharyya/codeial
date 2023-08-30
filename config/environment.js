@@ -22,7 +22,7 @@ const development = {
         port: 587,
         secure: false,
         auth: {
-            user: 'arkabhattacharyya.brc@gmail.com',
+            user: 'abc@gmail.com',
             pass: 'njnkbnqfneiyhjfy'
         }
     },
